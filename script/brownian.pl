@@ -5,12 +5,12 @@ use strict;
 
 use File::Spec;
 use File::Basename 'dirname';
-use Bot::BasicBot::Pluggable;
-use Bot::BasicBot::Pluggable::Brownian;
 
 use lib join '/', File::Spec->splitdir(dirname(__FILE__)), '..', 'lib';
 use lib '/home/infobot/lib';
 
+use Bot::BasicBot::Pluggable;
+use Bot::BasicBot::Pluggable::Module::Brownian;
 
 my $brownian = Bot::BasicBot::Pluggable->new(
     channels => [ "#heartofgold" ],
