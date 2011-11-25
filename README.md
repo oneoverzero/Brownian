@@ -4,7 +4,7 @@ The [One Over Zero](http://oneoeverzero.org/) IRC brownian motion producer.
 
 ## Where?
 
-Head over to [irc.freenode.or](irc.freenode.org), and join *#heartofgold*, to say hello.
+Head over to [Freenode](http://freenode.net/), and join *#heartofgold*, to say hello.
 
 We promise to be friendly :-)
 
