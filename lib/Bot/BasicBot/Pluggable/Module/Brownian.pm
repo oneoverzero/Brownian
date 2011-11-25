@@ -1,73 +1,115 @@
 package Bot::BasicBot::Pluggable::Module::Brownian;
 
 use strict;
-use Bot::BasicBot::Pluggable::Module; 
+use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
+our $VERSION = 0.02;
+
 # ways to say hello
-my @hello = ('hello', 'hi', 'hey', 'bonjour', 'hola', 'salut', 'que tal',
-             'whazup?', 'oh hai!');
+my @hello = (
+    'hello',   'hi',      'hey', 'bonjour', 'hola', 'salut',
+    'que tal', 'whazup?', 'oh hai!'
+);
 
 # things to say when people thank me
-my @welcomes = ('no problem', 'my pleasure', 'sure thing',
-                'no worries', 'de nada', 'de rien', 'bitte', 'pas de quoi');
+my @welcomes = (
+    'no problem',
+    'my pleasure',
+    'sure thing',
+    'no worries',
+    'de nada',
+    'de rien',
+    'bitte',
+    'pas de quoi'
+);
 
 # ways to thank
-my @thanks = ('thanks', 'much obliged', ':-)');
+my @thanks = ( 'thanks', 'much obliged', ':-)' );
 
 # ways to complain
-my @complaints = ('What??', 'Ouch, stop that!', 'You hit like a girl!', 
-                  'Is that all you got?!', 'SORRY MASTER!', 'YOU BITCH!',
-		  'I\'M GONNA TELL!', 'I\'m gonna get you for that!',
-		  'Ooh, you\'re a kinky one, aren\'t you?');
+my @complaints = (
+    'What??',
+    'Ouch, stop that!',
+    'You hit like a girl!',
+    'Is that all you got?!',
+    'SORRY MASTER!',
+    'YOU BITCH!',
+    'I\'M GONNA TELL!',
+    'I\'m gonna get you for that!',
+    'Ooh, you\'re a kinky one, aren\'t you?'
+);
 
-sub said { 
-    my ($self, $mess, $pri) = @_;
+sub init {
+    my $self = shift;
 
-    my $body = $mess->{body}; 
+    warn __PACKAGE__ . ": Initializing module (v. $VERSION)\n";
+}
+
+sub said {
+    my ( $self, $mess, $pri ) = @_;
+
+    my $body = $mess->{body};
     my $who  = $mess->{who};
 
-    my $nick      = $self->{nick} || "";
+    my $nick = $self->{nick} || "";
     my $addressed = $mess->{address};
 
-    return unless ($pri == 2);
+    return unless ( $pri == 2 );
+
+    if ( $addressed && $body =~ /^shutdown$/ && $self->authed($who) ) {
+        warn __PACKAGE__ . ": Shutting down at the request of user $who\n";
+        $self->tell( $mess->{channel},
+            "At the request of $who, I am leaving. Goodbye." );
+
+        # Horrible hack to deal with an ugly PoCo::RSSAggregator bug
+        if ( grep( /rss/, $self->bot->modules ) ) {
+            $self->bot->unload('rss');
+        }
+        $self->bot->shutdown( "Shutting down" );
+    }
 
     # Gotta be gender-neutral here... we're sensitive to the bot's needs. :-)
-    if ($body =~ /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i) {
-        my $reply = $thanks[int(rand(@thanks))];
-	if (!$addressed) {
-	    $reply .= ", $who";
-	}
-	return $reply;
+    if ( $body =~
+        /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i
+      )
+    {
+        my $reply = $thanks[ int( rand(@thanks) ) ];
+        if ( !$addressed ) {
+            $reply .= ", $who";
+        }
+        return $reply;
     }
 
-    if ($addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i) {
-        return $thanks[int(rand(@thanks))];
+    if ( $addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i ) {
+        return $thanks[ int( rand(@thanks) ) ];
     }
 
-    if ($addressed && $body =~ /thank(s| you)/i) {
-        $reply = $welcomes[int(rand(@welcomes))];
-    }     
+    if ( $addressed && $body =~ /thank(s| you)/i ) {
+        return $welcomes[ int( rand(@welcomes) ) ];
+    }
 
+    if ( $body =~
+/^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)( $nick)?\s*$/i
+      )
+    {
 
-    if ($body =~ /^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)( $nick)?\s*$/i) {
         # 65% chance of replying to a random greeting when not addressed
-        return if (!$addressed and rand() > 0.35);
+        return if ( !$addressed and rand() > 0.35 );
 
-        my($r) = $hello[int(rand(@hello))];
+        my ($r) = $hello[ int( rand(@hello) ) ];
         return "$r, $who";
     }
 
-    
-    if ($body =~ /(bot(\s|\-)?(slap|spank))/i) {
-        return $complaints[int(rand(@complaints))];
+    if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
+        return $complaints[ int( rand(@complaints) ) ];
     }
-
 
 }
 
 sub help {
-    return "Commands: 'botsnack', 'botspank', and a few more. Do explore. (nfn was here, btw, blame him if something goes wrong.)";
+    return
+"Commands: 'botsnack', 'botspank', and a few more. Do explore. (nfn was here, btw, blame him if something goes wrong.)";
 }
 
 1;
