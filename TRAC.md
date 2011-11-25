@@ -9,6 +9,7 @@ Issue, to-do, and wish list, tracking file for the Brownian development project.
 ## TO-DO
 
  - _(smpb, 24/11/2011)_ Deprecate this file and move all of this to a proper platform. Say, Github.
+ - _(nfn, 25/11/2011)_ Bot::YadaYada::RSS is still spammy as hell on the logs. Fix this.
 
 ## WISH LIST
 
