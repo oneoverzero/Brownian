@@ -6,44 +6,51 @@ use base qw(Bot::BasicBot::Pluggable::Module);
 
 our $VERSION = 0.03;
 
-# ways to say hello
-my @user_hello = (
-    'hello',   'hi',      'hey', 'bonjour', 'hola', 'salut',
-    'que tal', 'whazup?', 'oh hai!'
-);
-
-# things to say when people thank me
-my @user_welcomes = (
-    'no problem',
-    'my pleasure',
-    'sure thing',
-    'no worries',
-    'de nada',
-    'de rien',
-    'bitte',
-    'pas de quoi'
-);
-
-# ways to thank
-my @user_thanks = ( 'thanks', 'much obliged', ':-)' );
-
-# ways to complain
-my @user_complaints = (
-    'What??',
-    'Ouch, stop that!',
-    'You hit like a girl!',
-    'Is that all you got?!',
-    'SORRY MASTER!',
-    'YOU BITCH!',
-    'I\'M GONNA TELL!',
-    'I\'m gonna get you for that!',
-    'Ooh, you\'re a kinky one, aren\'t you?'
-);
-
 sub init {
     my $self = shift;
 
     warn __PACKAGE__ . ": Initializing module (v. $VERSION)\n";
+    $self->config(
+        {
+
+            # ways to say hello
+            user_greetings => [
+                'hello', 'hi',    'hey',     'bonjour',
+                'hola',  'salut', 'que tal', 'whazup?',
+                'oh hai!'
+            ],
+
+            # things to say when people thank me
+            user_welcomes => [
+                'no problem',
+                'my pleasure',
+                'sure thing',
+                'no worries',
+                'de nada',
+                'de rien',
+                'bitte',
+                'pas de quoi'
+            ],
+
+            # ways to thank
+            user_thanks => [ 'thanks', 'much obliged', ':-)' ],
+
+            # ways to complain
+            user_complaints => [
+                'What??',
+                'Ouch, stop that!',
+                'You hit like a girl!',
+                'Is that all you got?!',
+                'SORRY MASTER!',
+                'YOU BITCH!',
+                'I\'M GONNA TELL!',
+                'I\'m gonna get you for that!',
+                'Ooh, you\'re a kinky one, aren\'t you?'
+            ],
+
+            user_debug => 0,
+        }
+    );
 }
 
 sub said {
@@ -56,6 +63,11 @@ sub said {
     my $addressed = $mess->{address};
 
     return unless ( $pri == 2 );
+
+    my @user_greetings  = $self->get('user_greetings');
+    my @user_welcomes   = $self->get('user_welcomes');
+    my @user_thanks     = $self->get('user_thanks');
+    my @user_complaints = $self->get('user_complaints');
 
     if ( $addressed && $body =~ /^shutdown$/ && $self->authed($who) ) {
         warn __PACKAGE__ . ": Shutting down at the request of user $who\n";
@@ -97,7 +109,7 @@ sub said {
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
-        my ($r) = $user_hello[ int( rand(@user_hello) ) ];
+        my ($r) = $user_greetings[ int( rand(@user_greetings) ) ];
         return "$r, $who";
     }
 
