@@ -120,7 +120,7 @@ sub said {
 }
 
 sub help {
-    return "Commands: 'botsnack', 'botspank', and a few more. Do explore.";
+    return "Commands: 'botsnack', 'botspank', and a few more. Do explore. (v $VERSION)";
 }
 
 1;
