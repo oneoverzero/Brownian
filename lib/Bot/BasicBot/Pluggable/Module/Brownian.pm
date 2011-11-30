@@ -4,16 +4,16 @@ use strict;
 use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 # ways to say hello
-my @hello = (
+my @user_hello = (
     'hello',   'hi',      'hey', 'bonjour', 'hola', 'salut',
     'que tal', 'whazup?', 'oh hai!'
 );
 
 # things to say when people thank me
-my @welcomes = (
+my @user_welcomes = (
     'no problem',
     'my pleasure',
     'sure thing',
@@ -25,10 +25,10 @@ my @welcomes = (
 );
 
 # ways to thank
-my @thanks = ( 'thanks', 'much obliged', ':-)' );
+my @user_thanks = ( 'thanks', 'much obliged', ':-)' );
 
 # ways to complain
-my @complaints = (
+my @user_complaints = (
     'What??',
     'Ouch, stop that!',
     'You hit like a girl!',
@@ -66,7 +66,7 @@ sub said {
         if ( grep( /rss/, $self->bot->modules ) ) {
             $self->bot->unload('rss');
         }
-        $self->bot->shutdown( "Shutting down" );
+        $self->bot->shutdown("Shutting down");
     }
 
     # Gotta be gender-neutral here... we're sensitive to the bot's needs. :-)
@@ -74,7 +74,7 @@ sub said {
         /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i
       )
     {
-        my $reply = $thanks[ int( rand(@thanks) ) ];
+        my $reply = $user_thanks[ int( rand(@user_thanks) ) ];
         if ( !$addressed ) {
             $reply .= ", $who";
         }
@@ -82,11 +82,11 @@ sub said {
     }
 
     if ( $addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i ) {
-        return $thanks[ int( rand(@thanks) ) ];
+        return $user_thanks[ int( rand(@user_thanks) ) ];
     }
 
     if ( $addressed && $body =~ /thank(s| you)/i ) {
-        return $welcomes[ int( rand(@welcomes) ) ];
+        return $user_welcomes[ int( rand(@user_welcomes) ) ];
     }
 
     if ( $body =~
@@ -97,19 +97,18 @@ sub said {
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
-        my ($r) = $hello[ int( rand(@hello) ) ];
+        my ($r) = $user_hello[ int( rand(@user_hello) ) ];
         return "$r, $who";
     }
 
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
-        return $complaints[ int( rand(@complaints) ) ];
+        return $user_complaints[ int( rand(@user_complaints) ) ];
     }
 
 }
 
 sub help {
-    return
-"Commands: 'botsnack', 'botspank', and a few more. Do explore. (nfn was here, btw, blame him if something goes wrong.)";
+    return "Commands: 'botsnack', 'botspank', and a few more. Do explore.";
 }
 
 1;

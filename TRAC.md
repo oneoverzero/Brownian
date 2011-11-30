@@ -13,6 +13,8 @@ Issue, to-do, and wish list, tracking file for the Brownian development project.
 
 ## WISH LIST
 
+ - _(nfn, 30/11/2011)_ Add an alarm/reminders module to the bot.
+
  - _(smpb, 24/11/2011)_ The bot's very own internal karma meter:
    - He dislikes people that 'botslap' him often
    - He likes people that 'botsnack' him (but not too often!)
