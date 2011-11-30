@@ -4,7 +4,7 @@ use strict;
 use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 sub init {
     my $self = shift;
@@ -64,10 +64,10 @@ sub said {
 
     return unless ( $pri == 2 );
 
-    my @user_greetings  = $self->get('user_greetings');
-    my @user_welcomes   = $self->get('user_welcomes');
-    my @user_thanks     = $self->get('user_thanks');
-    my @user_complaints = $self->get('user_complaints');
+    my $greetings  = $self->get('user_greetings');
+    my $welcomes   = $self->get('user_welcomes');
+    my $thanks     = $self->get('user_thanks');
+    my $complaints = $self->get('user_complaints');
 
     if ( $addressed && $body =~ /^shutdown$/ && $self->authed($who) ) {
         warn __PACKAGE__ . ": Shutting down at the request of user $who\n";
@@ -86,7 +86,7 @@ sub said {
         /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i
       )
     {
-        my $reply = $user_thanks[ int( rand(@user_thanks) ) ];
+        my $reply = $thanks->[ int( rand(scalar(@$thanks)) ) ];
         if ( !$addressed ) {
             $reply .= ", $who";
         }
@@ -94,11 +94,11 @@ sub said {
     }
 
     if ( $addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i ) {
-        return $user_thanks[ int( rand(@user_thanks) ) ];
+        return $thanks->[ int( rand(scalar(@$thanks)) ) ];
     }
 
     if ( $addressed && $body =~ /thank(s| you)/i ) {
-        return $user_welcomes[ int( rand(@user_welcomes) ) ];
+        return $welcomes->[ int( rand(scalar(@$welcomes)) ) ];
     }
 
     if ( $body =~
@@ -109,18 +109,18 @@ sub said {
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
-        my ($r) = $user_greetings[ int( rand(@user_greetings) ) ];
+        my ($r) = $greetings->[ int( rand(scalar(@$greetings)) ) ];
         return "$r, $who";
     }
 
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
-        return $user_complaints[ int( rand(@user_complaints) ) ];
+        return $complaints->[ int( rand(scalar(@$complaints)) ) ];
     }
 
 }
 
 sub help {
-    return "Commands: 'botsnack', 'botspank', and a few more. Do explore. (v $VERSION)";
+    return "Commands: 'botsnack', 'botspank', and a few more. Do explore! (v $VERSION).";
 }
 
 1;
