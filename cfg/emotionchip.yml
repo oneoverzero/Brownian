@@ -1,0 +1,32 @@
+# EmotionChip basic configuration file
+#
+# Variables available:
+#   $WHO - the user addressing the bot
+#
+---
+dictionary :
+ snack  :
+  type  : GIFT
+  karma : 10
+ cookie :
+  type  : GIFT
+  karma : 10
+ slap   :
+  type  : AGGRESSION
+  karma : -10
+ punch  :
+  type  : AGGRESSION
+  karma : -10
+
+replies :
+ positive :
+  - :-D
+  - Thanks, $WHO!
+  - Cool.
+ neutral :
+  - Okay.
+  - Interesting.
+ negative :
+  - :-(
+  - Well, screw you too!
+  - You're a moron, $WHO...
