@@ -1,6 +1,7 @@
 Build.PL
 lib/Bot/BasicBot/Pluggable/Module/Brownian.pm
+etc/brownian.cfg-sample
 MANIFEST
 README.md
-script/brownian.pl
+script/brownian
 TRAC.md
