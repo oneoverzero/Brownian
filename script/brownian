@@ -1,0 +1,57 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+use File::Spec;
+use File::Basename 'dirname';
+
+use lib qw( /home/infobot/lib );
+use lib join '/', File::Spec->splitdir(dirname(__FILE__)), '..', 'lib';
+use lib join '/', File::Spec->splitdir(dirname(__FILE__)), '.', 'lib';
+
+use JSON;
+use Bot::BasicBot::Pluggable;
+use Data::Dumper;
+
+
+
+my %config = (
+    channels => ["#changeme"],
+    server   => "irc.freenode.net",
+    nick     => "dab0t",
+    name     => "I should name my bots better",
+);
+
+my $config_file = $ARGV[0] || '../etc/brownian.cfg';
+my $file_cfg = read_json_conf($config_file);
+if ( ref $file_cfg eq 'HASH' ) {
+    %config = %$file_cfg;
+}
+
+warn "$0: Starting up with the following config:\n";
+warn Dumper(\%config)."\n";
+
+my $brownian = Bot::BasicBot::Pluggable->new(%config);
+
+$brownian->load("Loader");
+$brownian->load("Auth");
+
+$brownian->run();
+
+########################################
+# Helper stuff. This could eventually make it into a library, if it grows
+#  for over two-three functions, but until then let's leave it like this.
+
+sub read_json_conf {
+    my $filename = shift;
+    my $fh;
+    if ( !open( $fh, '<', $filename ) ) {
+        warn "Error opening the config file \"$filename\": $!\n";
+        return;
+    }
+    my $json_conf = do { local $/; <$fh> };
+    my $conf = decode_json($json_conf);
+    return $conf;
+}
+

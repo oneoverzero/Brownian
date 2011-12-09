@@ -4,12 +4,13 @@ use strict;
 use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 sub init {
     my $self = shift;
 
     warn __PACKAGE__ . ": Initializing module (v. $VERSION)\n";
+
     $self->config(
         {
 
@@ -69,7 +70,8 @@ sub said {
     my $thanks     = $self->get('user_thanks');
     my $complaints = $self->get('user_complaints');
 
-    if ( $addressed && $body =~ /^shutdown$/ && $self->authed($who) ) {
+    # Admins can take me down
+    if ( $addressed && $body eq 'shutdown' && $self->authed($who) ) {
         warn __PACKAGE__ . ": Shutting down at the request of user $who\n";
         $self->tell( $mess->{channel},
             "At the request of $who, I am leaving. Goodbye." );
@@ -81,12 +83,42 @@ sub said {
         $self->bot->shutdown("Shutting down");
     }
 
+    # If either NickServ or an admin ask me to identify myself and
+    # I have a password, do it
+    if (
+        $addressed
+        && (
+            (
+                ( $who eq 'NickServ' )
+                && ( $body =~
+/^This nickname is registered. Please choose a different nickname, or identify via/
+                )
+            )
+            || ( $self->authed($who)
+                && ( $body eq 'authenticate' ) )
+        )
+      )
+    {
+        warn __PACKAGE__
+          . ": I have been asked by $who to authenticate myself\n";
+
+        if ( $self->bot->{password} ) {
+            $self->tell( 'NickServ', "identify " . $self->bot->{password} );
+            warn __PACKAGE__ . ": Sent identify command to NickServ\n";
+        }
+        else {
+            warn __PACKAGE__
+              . ": I don't have a password, ignoring the authentication request\n";
+        }
+
+    }
+
     # Gotta be gender-neutral here... we're sensitive to the bot's needs. :-)
     if ( $body =~
         /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i
       )
     {
-        my $reply = $thanks->[ int( rand(scalar(@$thanks)) ) ];
+        my $reply = $thanks->[ int( rand( scalar(@$thanks) ) ) ];
         if ( !$addressed ) {
             $reply .= ", $who";
         }
@@ -94,11 +126,11 @@ sub said {
     }
 
     if ( $addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i ) {
-        return $thanks->[ int( rand(scalar(@$thanks)) ) ];
+        return $thanks->[ int( rand( scalar(@$thanks) ) ) ];
     }
 
     if ( $addressed && $body =~ /thank(s| you)/i ) {
-        return $welcomes->[ int( rand(scalar(@$welcomes)) ) ];
+        return $welcomes->[ int( rand( scalar(@$welcomes) ) ) ];
     }
 
     if ( $body =~
@@ -109,18 +141,19 @@ sub said {
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
-        my ($r) = $greetings->[ int( rand(scalar(@$greetings)) ) ];
+        my ($r) = $greetings->[ int( rand( scalar(@$greetings) ) ) ];
         return "$r, $who";
     }
 
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
-        return $complaints->[ int( rand(scalar(@$complaints)) ) ];
+        return $complaints->[ int( rand( scalar(@$complaints) ) ) ];
     }
 
 }
 
 sub help {
-    return "Commands: 'botsnack', 'botspank', and a few more. Do explore! (v $VERSION).";
+    return
+"Commands: 'botsnack', 'botspank', 'shutdown', 'authenticate' and a few more. Do explore! (v $VERSION).";
 }
 
 1;

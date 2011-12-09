@@ -1,0 +1,10 @@
+{
+    "nick":"mybotsname",
+    "password":"doyouhaveone?",
+    "server":"irc.freenode.net",
+    "port":6667,
+    "channels":[
+        "#mytestchannel"
+    ],
+    "name":"My bot's description"
+}
