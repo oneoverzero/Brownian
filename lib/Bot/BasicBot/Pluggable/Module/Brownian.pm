@@ -4,7 +4,7 @@ use strict;
 use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
-our $VERSION = 0.05;
+our $VERSION = 0.07;
 
 sub init {
     my $self = shift;
@@ -16,8 +16,8 @@ sub init {
 
             # ways to say hello
             user_greetings => [
-                'hello', 'hi',    'hey',     'bonjour',
-                'hola',  'salut', 'que tal', 'whazup?',
+                'hello', 'hi',    'hey!',     'bonjour',
+                'hola',  'salut', 'que tal?', 'whazup?',
                 'oh hai!'
             ],
 
@@ -34,7 +34,7 @@ sub init {
             ],
 
             # ways to thank
-            user_thanks => [ 'thanks', 'much obliged', ':-)' ],
+            user_thanks => [ 'thanks', 'much obliged', 'thank you', 'sweet,' ],
 
             # ways to complain
             user_complaints => [
@@ -42,14 +42,16 @@ sub init {
                 'Ouch, stop that!',
                 'You hit like a girl!',
                 'Is that all you got?!',
-                'SORRY MASTER!',
+                'Sorry Master!',
                 'YOU BITCH!',
-                'I\'M GONNA TELL!',
+                'I\'m gonna tell!',
                 'I\'m gonna get you for that!',
                 'Ooh, you\'re a kinky one, aren\'t you?'
             ],
 
             user_debug => 0,
+
+            user_relay_bot => 'SubEtha',
         }
     );
 }
@@ -59,9 +61,20 @@ sub said {
 
     my $body = $mess->{body};
     my $who  = $mess->{who};
+    # Be aware of SubEtha's relaying of messages
+    my $relay_bot = $self->get('user_relay_bot');
+    my $real_who = $who;
+    if ((lc($who) eq lc($relay_bot)) and $body =~ /^<(.+?)>/) {
+        $real_who = $1;
+    }
 
     my $nick = $self->{nick} || "";
     my $addressed = $mess->{address};
+
+    my $DEBUG = $self->get('user_debug');
+    if ($DEBUG) {
+        warn __PACKAGE__ . ": \$body: \"$body\"; \$who: $who; \$real_who: $real_who; \$addressed: $addressed";
+    }
 
     return unless ( $pri == 2 );
 
@@ -120,7 +133,7 @@ sub said {
     {
         my $reply = $thanks->[ int( rand( scalar(@$thanks) ) ) ];
         if ( !$addressed ) {
-            $reply .= ", $who";
+            $reply .= " $real_who";
         }
         return $reply;
     }
@@ -142,11 +155,16 @@ sub said {
         return if ( !$addressed and rand() > 0.35 );
 
         my ($r) = $greetings->[ int( rand( scalar(@$greetings) ) ) ];
-        return "$r, $who";
+        return "$real_who, $r";
     }
 
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
         return $complaints->[ int( rand( scalar(@$complaints) ) ) ];
+    }
+
+    if ( $body  =~ /^(<.+> )?summon\s+(.*?)\s*$/i ) {
+        my $name =  $2;
+        return uc("$name ") x int(50 / (length($name)+1)) . "COME TO " . uc($real_who);
     }
 
 }
