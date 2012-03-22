@@ -178,7 +178,7 @@ sub tick {
 
 sub help {
     return
-"!twitterwatch <term>; !twitterunwatch <term>; twittersearches; twitterignore <user>";
+"!twitterwatch <term>; !twitterunwatch <term>; !twittersearches; !twitterignore <user>";
 }
 
 =head1 AUTHOR
