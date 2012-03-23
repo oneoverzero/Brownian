@@ -27,6 +27,7 @@ sub init {
             user_require_question => 1,
             user_http_timeout     => 10,
             user_rss_items        => 5,
+            user_relay_bot        => 'SubEtha',
             user_stopwords =>
               "here|how|it|something|that|this|what|when|where|which|who|why",
             user_unknown_responses =>
@@ -48,6 +49,12 @@ sub told {
     my ( $self, $mess ) = @_;
     my $body = $mess->{body};
     return unless defined $body;
+
+    #warn __PACKAGE__ . ": In \"told\"";
+    #warn __PACKAGE__ . ": Original message struct:\n" . Dumper($mess);
+    $mess = $self->deal_with_relay_bot($mess);
+    #warn __PACKAGE__ . ": New message struct:\n" . Dumper($mess);
+    $body = $mess->{body};
 
     # looks like an infobot reply.
     if ( $body =~ s/^:INFOBOT:REPLY (\S+) (.*)$// ) {
@@ -90,6 +97,12 @@ sub told {
 
 sub fallback {
     my ( $self, $mess ) = @_;
+
+    #warn __PACKAGE__ . ": In \"fallback\"";
+    #warn __PACKAGE__ . ": Original message struct:\n" . Dumper($mess);
+    $mess = $self->deal_with_relay_bot($mess);
+    #warn __PACKAGE__ . ": New message struct:\n" . Dumper($mess);
+
     my $body = $mess->{body} || "";
 
     my $is_priv = !defined $mess->{channel} || $mess->{channel} eq 'msg';
@@ -449,7 +462,53 @@ sub infobot_reply {
 
 }
 
-1;
+sub deal_with_relay_bot {
+    my ($self, $mess) = @_;
+
+    my $relay_bot = $self->get('user_relay_bot');
+
+    if (lc($mess->{who}) ne lc($relay_bot)) {
+        return $mess;
+    }
+
+#{'body' => 'stupid?','raw_nick' => 'nfn!~nfn@vs0205.flosoft-servers.net','who' => 'nfn','channel' => '#heartofgold','raw_body' => 'stupid?'}
+#{'body' => 'stupid?','raw_nick' => 'nfn!~nfn@vs0205.flosoft-servers.net','who' => 'nfn','address' => 'brownian','channel' => '#heartofgold','raw_body' => 'brownian: stupid?'}
+#{'body' => 'stupid is as stupid does','raw_nick' => 'nfn!~nfn@vs0205.flosoft-servers.net','who' => 'nfn','channel' => '#heartofgold','raw_body' => 'stupid is as stupid does'}
+#{'body' => 'stupid is as stupid does','raw_nick' => 'nfn!~nfn@vs0205.flosoft-servers.net','who' => 'nfn','address' => 'brownian','channel' => '#heartofgold','raw_body' => 'brownian: stupid is as stupid does'}
+#{'body' => 'forget stupid','raw_nick' => 'nfn!~nfn@vs0205.flosoft-servers.net','who' => 'nfn','address' => 'brownian','channel' => '#heartofgold','raw_body' => 'brownian: forget stupid'}
+
+#{'body' => "<joao.silva.neves> nfn: nos? rebentar um bot de proposito? nunca!",'raw_nick' => 'subetha!~subetha@vs0205.flosoft-servers.net','who' => 'subetha','channel' => '#heartofgold','raw_body' => "<joao.silva.neves> nfn: nos? rebentar um bot de proposito? nunca!"}
+#{'body' => "* *joao.silva.neves* as vezes mente",'raw_nick' => 'subetha!~subetha@vs0205.flosoft-servers.net','who' => 'subetha','channel' => '#heartofgold','raw_body' => "* *joao.silva.neves* as vezes mente"}
+
+    my $new_mess = {};
+    my ($trash, $new_body) = $mess->{body}=~/(<.+?> )?(.+)/;
+    my ($new_who) = $mess->{body}=~/<(.+?)> /;
+    my $my_nick = $self->bot->nick;
+    if ($new_body=~/^$my_nick:\s+(.*)$/) {
+        #warn __PACKAGE__ . ": I am being addressed from beyound the mirror!";
+        $new_mess->{address}=$my_nick;
+        $new_body = $1;
+    }
+    #warn __PACKAGE__ . ": \$new_body: \"$new_body\"; \$new_who: \"$new_who\"";
+    foreach my $k (keys %$mess) {
+        if (($k eq 'body') and $new_body) {
+            $new_mess->{body} = $new_body;
+        }
+        elsif (($k eq 'who') and $new_who) {
+            $new_mess->{who} = $new_who
+        }
+        elsif (($k eq 'address') and (exists($new_mess->{address}))) {
+            warn __PACKAGE__ . ": I'm confused, I found an 'address' field of " . $mess->{address} . " on the original message and I wasn't expecting it. I'll just ignore it.";
+        }
+        else {
+            $new_mess->{$k} = $mess->{$k}
+        }
+    }
+
+    return $new_mess;
+}
+
+42;
 
 __END__
 
