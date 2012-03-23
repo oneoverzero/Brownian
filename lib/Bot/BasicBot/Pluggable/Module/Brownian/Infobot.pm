@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Brownian::Infobot;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.94';
 }
 use strict;
 use warnings;
