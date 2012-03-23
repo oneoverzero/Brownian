@@ -270,6 +270,7 @@ sub identify_before_nickserv {
 sub friendliness {
     my ( $self, $who ) = @_;
 
+    $who = lc($who);
     my $level = $self->get("friendliness_$who") || 0;
     warn __PACKAGE__ . ": Got friendliness level of $level for $who";
 
@@ -303,6 +304,7 @@ sub friendliness {
 sub like {
     my ( $self, $who, $how_much ) = @_;
 
+    $who = lc($who);
     $how_much |= 1;
     my $level = $self->get("friendliness_$who") || 0;
     $level += $how_much;
@@ -314,6 +316,7 @@ sub like {
 sub dislike {
     my ( $self, $who, $how_much ) = @_;
 
+    $who = lc($who);
     $how_much |= 1;
     my $level = $self->get("friendliness_$who") || 0;
     $level -= $how_much;
@@ -325,6 +328,7 @@ sub dislike {
 sub exonerate {
     my ( $self, $who ) = @_;
 
+    $who = lc($who);
     $self->set( "friendliness_$who" => 0 );
     warn __PACKAGE__ . ": I now like $who by 0";
 }
