@@ -207,7 +207,7 @@ sub said {
     }
 
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
-        $my $friend_level = self->dislike( $who, 2 );
+        my $friend_level = self->dislike( $who, 2 );
         return $complaints->{$friend_level}
           [ int( rand( scalar( @{ $complaints->{$friend_level} } ) ) ) ];
     }
