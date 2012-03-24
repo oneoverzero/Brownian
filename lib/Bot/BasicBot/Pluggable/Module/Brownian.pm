@@ -113,6 +113,8 @@ sub init {
 sub said {
     my ( $self, $mess, $pri ) = @_;
 
+    return unless ( $pri == 2 );
+
     $mess = $self->deal_with_relay_bot($mess);
 
     my $body = $mess->{body};
@@ -126,8 +128,6 @@ sub said {
         warn __PACKAGE__
           . ": \$body: \"$body\"; \$who: $who; \$who: $who; \$addressed: $addressed";
     }
-
-    return unless ( $pri == 2 );
 
     my $greetings  = $self->get('greetings');
     my $welcomes   = $self->get('welcomes');
@@ -160,36 +160,36 @@ sub said {
         /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i
       )
     {
-        my $friend_level = $self->like( $who, 3 );
+        my $friend_level = $self->friendliness( $self->like( $who, 3 ) );
         my $r =
           $thanks->{$friend_level}
           [ int( rand( scalar( @{ $thanks->{$friend_level} } ) ) ) ];
         if ( !$addressed ) {
-            $r .= " $who";
+            $r = "$r $who";
         }
         return $r;
     }
 
     if ( $addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i ) {
-        my $friend_level = $self->like( $who, 3 );
-        return $thanks->{$friend_level}
+        my $friend_level = $self->friendliness( $self->like( $who, 3 ) );
+        my $r =
+          $thanks->{$friend_level}
           [ int( rand( scalar( @{ $thanks->{$friend_level} } ) ) ) ];
+        return $r;
     }
 
     if ( $addressed && $body =~ /thank(s| you)/i ) {
         if ( rand() > 0.8 ) {
             $self->like( $who, 1 );
         }
-        my $friend_level = $self->friendliness($who);
-        return $welcomes->{$friend_level}
+        my $friend_level = $self->friendliness( $self->friendliness($who) );
+        my $r =
+          $welcomes->{$friend_level}
           [ int( rand( scalar( @{ $welcomes->{$friend_level} } ) ) ) ];
+        return $r;
     }
 
-    if ( $body =~
-/^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)( $nick)?\s*$/i
-      )
-    {
-
+    if ( $body =~ /^\s*(h(ello|i( there)?|ey))( $nick)?\s*$/i ) {
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
@@ -207,9 +207,11 @@ sub said {
     }
 
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
-        my $friend_level = self->dislike( $who, 2 );
-        return $complaints->{$friend_level}
+        my $friend_level = $self->friendliness( $self->dislike( $who, 2 ) );
+        my $r =
+          $complaints->{$friend_level}
           [ int( rand( scalar( @{ $complaints->{$friend_level} } ) ) ) ];
+        return $r;
     }
 
     if ( $body =~ /^(<.+> )?summon\s+(.*?)\s*$/i ) {
@@ -272,7 +274,10 @@ sub friendliness {
 
     $who = lc($who);
     my $level = $self->get("friendliness_$who") || 0;
-    warn __PACKAGE__ . ": Got friendliness level of $level for $who";
+    my $DEBUG = $self->get('user_debug');
+    if ($DEBUG) {
+        warn __PACKAGE__ . ": Got friendliness level of $level for $who";
+    }
 
     if ( ( $level >= -5 ) && ( $level <= 5 ) ) {
         return 'neutral';
@@ -309,7 +314,10 @@ sub like {
     my $level = $self->get("friendliness_$who") || 0;
     $level += $how_much;
     $self->set( "friendliness_$who" => $level );
-    warn __PACKAGE__ . ": I now like $who by $level";
+    my $DEBUG = $self->get('user_debug');
+    if ($DEBUG) {
+        warn __PACKAGE__ . ": I now like $who by $level";
+    }
     return $level;
 }
 
@@ -321,7 +329,10 @@ sub dislike {
     my $level = $self->get("friendliness_$who") || 0;
     $level -= $how_much;
     $self->set( "friendliness_$who" => $level );
-    warn __PACKAGE__ . ": I now like $who by $level";
+    my $DEBUG = $self->get('user_debug');
+    if ($DEBUG) {
+        warn __PACKAGE__ . ": I now like $who by $level";
+    }
     return $level;
 }
 
@@ -330,7 +341,10 @@ sub exonerate {
 
     $who = lc($who);
     $self->set( "friendliness_$who" => 0 );
-    warn __PACKAGE__ . ": I now like $who by 0";
+    my $DEBUG = $self->get('user_debug');
+    if ($DEBUG) {
+        warn __PACKAGE__ . ": I now like $who by 0";
+    }
 }
 
 sub deal_with_relay_bot {
@@ -356,13 +370,10 @@ sub deal_with_relay_bot {
     my ($new_who) = $mess->{body} =~ /<(.+?)> /;
     my $my_nick = $self->bot->nick;
     if ( $new_body =~ /^$my_nick:\s+(.*)$/ ) {
-
-        #warn __PACKAGE__ . ": I am being addressed from beyound the mirror!";
         $new_mess->{address} = $my_nick;
         $new_body = $1;
     }
 
-    #warn __PACKAGE__ . ": \$new_body: \"$new_body\"; \$new_who: \"$new_who\"";
     foreach my $k ( keys %$mess ) {
         if ( ( $k eq 'body' ) and $new_body ) {
             $new_mess->{body} = $new_body;
