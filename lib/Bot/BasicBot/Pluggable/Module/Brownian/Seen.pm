@@ -7,7 +7,7 @@ our $VERSION = '0.86';
 
 sub init {
     my $self = shift;
-    $self->config( { user_allow_hiding => 1 } );
+    $self->config( { user_allow_hiding => 1, user_relay_bot => 'SubEtha' } );
 }
 
 sub help {
@@ -118,42 +118,46 @@ sub secs_to_string {
 }
 
 sub deal_with_relay_bot {
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
 
     my $relay_bot = $self->get('user_relay_bot');
 
-    if (lc($mess->{who}) ne lc($relay_bot)) {
+    if ( lc( $mess->{who} ) ne lc($relay_bot) ) {
         return $mess;
     }
 
     my $new_mess = {};
-    my ($trash, $new_body) = $mess->{body}=~/(<.+?> )?(.+)/;
-    my ($new_who) = $mess->{body}=~/<(.+?)> /;
+    my ( $trash, $new_body ) = $mess->{body} =~ /(<.+?> )?(.+)/;
+    my ($new_who) = $mess->{body} =~ /<(.+?)> /;
     my $my_nick = $self->bot->nick;
-    if ($new_body=~/^$my_nick:\s+(.*)$/) {
+    if ( $new_body =~ /^$my_nick:\s+(.*)$/ ) {
+
         #warn __PACKAGE__ . ": I am being addressed from beyond the mirror!";
-                $new_mess->{address}=$my_nick;
+        $new_mess->{address} = $my_nick;
         $new_body = $1;
     }
+
     #warn __PACKAGE__ . ": \$new_body: \"$new_body\"; \$new_who: \"$new_who\"";
-    foreach my $k (keys %$mess) {
-        if (($k eq 'body') and $new_body) {
+    foreach my $k ( keys %$mess ) {
+        if ( ( $k eq 'body' ) and $new_body ) {
             $new_mess->{body} = $new_body;
         }
-        elsif (($k eq 'who') and $new_who) {
-            $new_mess->{who} = $new_who
+        elsif ( ( $k eq 'who' ) and $new_who ) {
+            $new_mess->{who} = $new_who;
         }
-        elsif (($k eq 'address') and (exists($new_mess->{address}))) {
-            warn __PACKAGE__ . ": I'm confused, I found an 'address' field of " . $mess->{address} . " on the original message and I wasn't expecting it. I'll just ignore it.";
+        elsif ( ( $k eq 'address' ) and ( exists( $new_mess->{address} ) ) ) {
+            warn __PACKAGE__
+              . ": I'm confused, I found an 'address' field of "
+              . $mess->{address}
+              . " on the original message and I wasn't expecting it. I'll just ignore it.";
         }
         else {
-            $new_mess->{$k} = $mess->{$k}
+            $new_mess->{$k} = $mess->{$k};
         }
     }
 
     return $new_mess;
 }
-
 
 42;
 
