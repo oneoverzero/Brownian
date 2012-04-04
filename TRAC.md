@@ -30,10 +30,6 @@ Issue, to-do, and wish list, tracking file for the Brownian development project.
      interactions in the form of botslaps and botsnacks. In the extreme the bot
      should stop responding to the user after being heavily abused
 
- - _(nfn, 25/11/2011)_ Implement a 'backlog' module, allowing people to read 
-   the backlog for the last N [minutes|interactions] before they joined the 
-   channel. (See logging module)
-
  - _(nfn, 25/11/2011)_ Implement a 'substitute' module that catches phrases 
    like 's/this/that/' and replies with 'user meant "latest user's phrase with 
    substitution'
@@ -65,3 +61,8 @@ Issue, to-do, and wish list, tracking file for the Brownian development project.
 
  - _(nfn, 25/11/2011)_ Implement a logging module. 
    -- Solved by _(nfn, 23/03/2012)_
+
+ - _(nfn, 25/11/2011)_ Implement a 'backlog' module, allowing people to read 
+   the backlog for the last N [minutes|interactions] before they joined the 
+   channel. (See logging module) -- Solved by (_nfn, 04/04/2012)_
+
