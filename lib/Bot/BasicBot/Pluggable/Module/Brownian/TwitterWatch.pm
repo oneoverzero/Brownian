@@ -5,7 +5,7 @@ use base 'Bot::BasicBot::Pluggable::Module';
 use Net::Twitter::Lite;
 use HTML::Entities;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ sub said {
     return unless $pri == 2;
 
     my $message;
-    if ( my ( $command, $params ) = $mess->{body} =~ /^!(twitter\w+)\S*?(.*)/i )
+    if ( my ( $command, $params ) = $mess->{body} =~ /^!(twitter\w+)\s*(.*)/i )
     {
 
         # We need to know what channel we're talking about, so if this was a
