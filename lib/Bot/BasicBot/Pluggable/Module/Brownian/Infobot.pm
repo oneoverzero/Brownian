@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Brownian::Infobot;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.94';
+  $Bot::BasicBot::Pluggable::Module::Brownian::Infobot::VERSION = '0.1';
 }
 use strict;
 use warnings;
@@ -41,8 +41,7 @@ sub init {
 }
 
 sub help {
-    return
-"An infobot. See http://search.cpan.org/perldoc?Bot::BasicBot::Pluggable::Module::Infobot.";
+    return "Hi! I keep the collective memory of the community. Give me snacks and I'll like you."
 }
 
 sub told {
@@ -514,11 +513,7 @@ __END__
 
 =head1 NAME
 
-Bot::BasicBot::Pluggable::Module::Infobot - infobot clone redone in B::B::P.
-
-=head1 VERSION
-
-version 0.93
+Bot::BasicBot::Pluggable::Module::Brownian::Infobot - infobot clone redone in B::B::P.
 
 =head1 SYNOPSIS
 

@@ -9,7 +9,7 @@ our $VERSION = '0.05';
 
 =head1 NAME
 
-Bot::BasicBot::Pluggable::Module::TwitterWatch - report new tweets matching given search patterns
+Bot::BasicBot::Pluggable::Module::Brownian::TwitterWatch - report new tweets matching given search patterns
 
 =head1 DESCRIPTION
 
@@ -202,7 +202,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Bot::BasicBot::Pluggable::Module::TwitterWatch
+    perldoc Bot::BasicBot::Pluggable::Module::Brownian::TwitterWatch
 
 
 You can also look for information at:
@@ -244,4 +244,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1;    # End of Bot::BasicBot::Pluggable::Module::TwitterWatch
+1;    # End of Bot::BasicBot::Pluggable::Module::Brownian::TwitterWatch

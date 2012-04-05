@@ -3,7 +3,7 @@ use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
 use strict;
 
-our $VERSION = '0.86';
+our $VERSION = '0.1';
 
 sub init {
     my $self = shift;
@@ -165,11 +165,7 @@ __END__
 
 =head1 NAME
 
-Bot::BasicBot::Pluggable::Module::Seen - track when and where people were seen
-
-=head1 VERSION
-
-version 0.93
+Bot::BasicBot::Pluggable::Module::Brownian::Seen - track when and where people were seen
 
 =head1 IRC USAGE
 

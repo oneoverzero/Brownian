@@ -220,17 +220,13 @@ sub help {
     return "rss [add uri|remove|list]";
 }
 
-1;    # End of Bot::BasicBot::Pluggable::Module::RSS
+1;    # End of Bot::BasicBot::Pluggable::Module::Brownian::RSS
 
 __END__
 
 =head1 NAME
 
-Bot::BasicBot::Pluggable::Module::RSS - RSS feed aggregator for your bot
-
-=head1 VERSION
-
-Version 0.04
+Bot::BasicBot::Pluggable::Module::Brownian::RSS - RSS feed aggregator for your bot
 
 =head1 SYNOPSIS
 
@@ -325,7 +321,7 @@ Extensively hacked on by Nuno Nunes, C<< <nuno at nunonunes dot org> >>
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Bot::BasicBot::Pluggable::Module::RSS
+    perldoc Bot::BasicBot::Pluggable::Module::Brownian::RSS
 
 
 You can also look for information at:

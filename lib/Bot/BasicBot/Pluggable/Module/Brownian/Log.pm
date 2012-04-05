@@ -165,11 +165,7 @@ sub _format_message {
 
 =head1 NAME
 
-Bot::BasicBot::Pluggable::Module::Log - Provide logging for Bot::BasicBot::Pluggable
-
-=head1 VERSION
-
-Version 0.11
+Bot::BasicBot::Pluggable::Module::Brownian::Log - Provide logging for Bot::BasicBot::Pluggable
 
 =head1 SYNOPSIS
 
@@ -300,7 +296,7 @@ on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Bot::BasicBot::Pluggable::Module::Log
+    perldoc Bot::BasicBot::Pluggable::Module::Brownian::Log
 
 
 You can also look for information at:
@@ -350,4 +346,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1;    # End of Bot::BasicBot::Pluggable::Module::Log
+1;    # End of Bot::BasicBot::Pluggable::Module::Brownian::Log
