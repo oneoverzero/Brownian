@@ -5,7 +5,7 @@ use base 'Bot::BasicBot::Pluggable::Module';
 use Net::Twitter::Lite;
 use HTML::Entities;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -54,6 +54,9 @@ sub said {
 
         $params = lc $params;
         $params =~ s/\s+$//;
+        if ($params =~ /^"(.*)"$/) {
+            $params = $1;
+        }
         my $searches = $self->get('twitter_searches') || {};
         $searches->{ lc $mess->{channel} } ||= {};
         my $chansearches = $searches->{ lc $mess->{channel} };
