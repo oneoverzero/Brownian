@@ -4,7 +4,7 @@ use strict;
 use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub init {
     my $self = shift;
@@ -16,16 +16,38 @@ sub init {
 
             # ways to say hello
             greetings => {
-                'neutral' => [ 'hello', 'hi',     'hey',     'bonjour', ],
-                'like'    => [ 'hey!',  'wazup?', 'oh hai!', 'gud moaning', ],
-                'love'    => [ 'welcome!',      'hey! :-)', ],
-                'bff'     => [ 'you\'re back!', 'wb!', 'good to see you!', ],
-                'dislike' => [ '\'lo',          'meh', '...', ],
-                'hate' => [
-                    'go away', 'not you again!',
-                    'shoo', 'they let you out again, heh?',
+                'neutral' => [ 'hello', 'hi', 'hey', 'bonjour', ],
+                'like' =>
+                  [ 'hey!', 'wazup?', 'oh hai!', 'gud moaning', 'bonjour' ],
+                'love' => [
+                    'welcome!', 'hey! :-)', 'oh hai!', 'wazup?',
+                    'oh cool, you\'re here!'
                 ],
-                'kill' => [ 'go die in a fire!', 'you again? sheesh!', ],
+                'bff' => [
+                    'you\'re back!',
+                    'wb!',
+                    'good to see you!',
+                    'oh cool, you\'re here!',
+                    'hey hey, you\'re back! :-D'
+                ],
+                'dislike' =>
+                  [ '\'lo', 'meh', '...', 'pfff', 'oh, it\'s you...' ],
+                'hate' => [
+                    'go away',
+                    'not you again!',
+                    'shoo',
+                    'they let you out again, heh?',
+                    'oh sheesh, not you again...',
+                    'oh, it\'s you...'
+                ],
+                'kill' => [
+                    'go die in a fire!',
+                    'you again? sheesh!',
+                    'go away!!',
+                    'shoo! go pester someone else',
+                    'oh frack, you\'re back',
+                    'you\'re here? and we were having such a good time...'
+                ],
             },
 
             # things to say when people thank me
@@ -43,7 +65,11 @@ sub init {
                 ],
                 'dislike' => [ 'yeah', 'ok', ],
                 'hate'    => [ 'meh',  'ah shut up', ],
-                'kill'    => [ 'oh go jump off a bridge', ],
+                'kill'    => [
+                    'oh go jump off a bridge',
+                    'don\'t thank me, I was forced to do it',
+                    'just stuf, ok?'
+                ],
             },
 
             # ways to thank
@@ -69,7 +95,8 @@ sub init {
 
             # ways to complain
             complaints => {
-                'neutral' => [ 'hey!', 'that was uncalled for', ':-(', ],
+                'neutral' =>
+                  [ 'hey!', 'that was uncalled for', ':-(', 'what?' ],
                 'like' =>
                   [ 'not cool', 'what? not cool dude.', 'come on...', 'hey!', ],
                 'love' => [
@@ -79,7 +106,8 @@ sub init {
                 ],
                 'bff' => [
                     'I meant no harm!',
-                    'come on...', 'but why?', 'I really don\'t like tough love',
+                    'come on...', 'but why??',
+                    'I really don\'t like tough love',
                 ],
                 'dislike' => [
                     'stop that you wanker',
@@ -189,7 +217,8 @@ sub said {
         return $r;
     }
 
-    if ( $body =~ /^\s*(h(ello|i( there)?|ey))( $nick)?\s*$/i ) {
+    if ( $body =~ /^\s*(h(ello|i( there)?|ey))( $nick)?[!.]*\s*$/i ) {
+
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
