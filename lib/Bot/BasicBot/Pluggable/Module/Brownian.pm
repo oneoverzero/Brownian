@@ -4,7 +4,7 @@ use strict;
 use Bot::BasicBot::Pluggable::Module;
 use base qw(Bot::BasicBot::Pluggable::Module);
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 sub init {
     my $self = shift;
@@ -154,7 +154,7 @@ sub said {
     my $DEBUG = $self->get('user_debug');
     if ($DEBUG) {
         warn __PACKAGE__
-          . ": \$body: \"$body\"; \$who: $who; \$who: $who; \$addressed: $addressed";
+          . ": \$body: \"$body\"; \$who: $who; \$addressed: $addressed";
     }
 
     my $greetings  = $self->get('greetings');
@@ -162,7 +162,11 @@ sub said {
     my $thanks     = $self->get('thanks');
     my $complaints = $self->get('complaints');
 
-    # Admins can take me down
+    ######################################################################
+    # SHUTDOWN COMMAND
+    #
+    # Only admins can take me down
+    #
     if ( $addressed && $body eq 'shutdown' && $self->authed($who) ) {
         warn __PACKAGE__ . ": Shutting down at the request of user $who\n";
         $self->tell( $mess->{channel},
@@ -175,20 +179,27 @@ sub said {
         $self->bot->shutdown("Shutting down");
     }
 
+    ######################################################################
+    # AUTHENTICATE TO NICKSERV
+    #
     # If either NickServ or an admin ask me to identify myself and
     # I have a password, do it
+    #
     if ( $addressed
         && ( ( $who eq 'NickServ' ) || ( $body eq 'authenticate' ) ) )
     {
         $self->identify_before_nickserv( $who, $body );
     }
 
-    # Gotta be gender-neutral here... we're sensitive to the bot's needs. :-)
+    ######################################################################
+    # RECEIVE COMPLIMENTS
+    #
     if ( $body =~
         /(good(\s+fuckin[\'g]?)?\s+(bo(t|y)|g([ui]|r+)rl))|(bot(\s|\-)?snack)/i
       )
     {
-        my $friend_level = $self->friendliness( $self->like( $who, 3 ) );
+        $self->like( $who, 3 );
+        my $friend_level = $self->friendliness($who);
         my $r =
           $thanks->{$friend_level}
           [ int( rand( scalar( @{ $thanks->{$friend_level} } ) ) ) ];
@@ -199,30 +210,38 @@ sub said {
     }
 
     if ( $addressed && $body =~ /you (rock|rocks|rewl|rule|are so+ co+l)/i ) {
-        my $friend_level = $self->friendliness( $self->like( $who, 3 ) );
+        $self->like( $who, 3 );
+        my $friend_level = $self->friendliness($who);
         my $r =
           $thanks->{$friend_level}
           [ int( rand( scalar( @{ $thanks->{$friend_level} } ) ) ) ];
         return $r;
     }
 
+    ######################################################################
+    # RECEIVE THANK YOUS
+    #
     if ( $addressed && $body =~ /thank(s| you)/i ) {
-        if ( rand() > 0.8 ) {
+
+        if ( rand() > 0.9 ) {
             $self->like( $who, 1 );
         }
-        my $friend_level = $self->friendliness( $self->friendliness($who) );
+        my $friend_level = $self->friendliness($who);
         my $r =
           $welcomes->{$friend_level}
           [ int( rand( scalar( @{ $welcomes->{$friend_level} } ) ) ) ];
         return $r;
     }
 
+    ######################################################################
+    # RECEIVE GREETINGS
+    #
     if ( $body =~ /^\s*(h(ello|i( there)?|ey))( $nick)?[!.]*\s*$/i ) {
 
         # 65% chance of replying to a random greeting when not addressed
         return if ( !$addressed and rand() > 0.35 );
 
-        if ($addressed) {
+        if ( $addressed && rand() > 0.9 ) {
             $self->like( $who, 1 );
         }
         my $friend_level = $self->friendliness($who);
@@ -235,14 +254,21 @@ sub said {
         return $r;
     }
 
+    ######################################################################
+    # BE ABUSED
+    #
     if ( $body =~ /(bot(\s|\-)?(slap|spank))/i ) {
-        my $friend_level = $self->friendliness( $self->dislike( $who, 2 ) );
+        $self->dislike( $who, 2 );
+        my $friend_level = $self->friendliness($who);
         my $r =
           $complaints->{$friend_level}
           [ int( rand( scalar( @{ $complaints->{$friend_level} } ) ) ) ];
         return $r;
     }
 
+    ######################################################################
+    # SUMMON COMMAND
+    #
     if ( $body =~ /^(<.+> )?summon\s+(.*?)\s*$/i ) {
         my $name = $2;
         return
@@ -251,6 +277,12 @@ sub said {
           . uc($who);
     }
 
+    ######################################################################
+    # EXONERATE SOMEONE
+    #
+    # Reset my "feelings" towards a person. Only admins are allowed to
+    # do this.
+    #
     if ( $body =~ /^exonerate\s+(.+?)\s*$/ ) {
         my $name = $1;
         if ( $self->authed($who) ) {
