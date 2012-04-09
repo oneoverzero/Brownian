@@ -98,7 +98,7 @@ sub told {
 
         my $store = $self->bot->store;
         if ($store) {
-            my $key = "friendliness_$param";
+            my $key = lc("friendliness_$param");
             my $friendliness = $store->get( 'Brownian', $key );
             if ($friendliness) {
                 $reply .= $self->format_friendliness($friendliness);
@@ -144,7 +144,7 @@ sub maybe_add_giver {
     }
     else {
 
-        # just returning the reason string of the reason hash referenes
+        # just returning the reason string of the reason hash references
         return map { $_->{reason} } @reasons;
     }
 }
@@ -170,7 +170,7 @@ sub get_karma {
     }
     $karma = $positive - $negative;
 
-    # The subroutine references return differant values when called.
+    # The subroutine references return different values when called.
     # If they are called in scalar context, they return the overall
     # positive or negative karma, but when called in list context you
     # get an array of hash references with all non empty reasons back.
@@ -239,7 +239,7 @@ sub format_friendliness {
         return ' And we\'re BFFs!';
     }
     elsif ( ( $level < -5 ) && ( $level >= -20 ) ) {
-        return ' Not a very nice person.';
+        return ' Can\'t say I care much for this person.';
     }
     elsif ( ( $level < -20 ) && ( $level >= -50 ) ) {
         return ' Should fall of the net for all I care.';
