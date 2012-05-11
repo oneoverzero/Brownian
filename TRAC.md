@@ -13,6 +13,10 @@ Issue, to-do, and wish list, tracking file for the Brownian development project.
 
 ## WISH LIST
 
+ - _(nfn, 11/05/2012)_ Implement a mechanism to store messages for users who are away.
+   Use the "tell X about Y" interface and, if _Y_ is not online, store the message and
+   send it to her when she comes back on.
+
  - _(nfn, 03/04/2012)_ Implement a URL collector module and give people access
    to it via the web.
 
