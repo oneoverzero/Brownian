@@ -583,7 +583,7 @@ sub _parse_file
             }
         } # *** lines
 
-        unless ($stats->{parsedlines} % 10000) { # keep only recent quotes to save memory
+        unless ($stats->{parsedlines} % 100000) { # keep only recent quotes to save memory
             $self->_trim_lines($lines);
         }
     } # while(my $line = <LOGFILE>)
