@@ -5,7 +5,7 @@ use base 'Bot::BasicBot::Pluggable::Module';
 use Net::Twitter::Lite;
 use HTML::Entities;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 NAME
 
@@ -25,6 +25,10 @@ what to monitor - use these commands within a channel:
   !twitterunwatch search term here
   !twittersearches
   !twitterignore username
+  !twitterignoring
+  !twitterfilter term to ignore
+  !twitterunfilter term to stop ignoring
+  !twitterfiltering
 
 Each channel has its own just of searches stored.
 
@@ -60,6 +64,9 @@ sub said {
         my $searches = $self->get('twitter_searches') || {};
         $searches->{ lc $mess->{channel} } ||= {};
         my $chansearches = $searches->{ lc $mess->{channel} };
+        my $filters = $self->get('twitter_filters') || {};
+        $filters-> { lc $mess->{channel} } ||= {};
+        my $chanfilters = $filters->{ lc $mess->{channel} };
 
         if ( lc $command eq 'twitterwatch' ) {
             $chansearches->{$params} = 0;
@@ -83,8 +90,31 @@ sub said {
             $ignore->{$params}++;
             $message = "OK, ignoring tweets from '$params'";
         }
+        elsif ( lc $command eq 'twitterignoring' ) {
+            my $ignores = $self->get('twitter_ignore') || {};
+            $message = "Currently ignoring: " . join ',',
+              map { qq["$_"] } keys %$ignores;
+        }
+        elsif ( lc $command eq 'twitterfilter' ) {
+            $chanfilters->{$params} = 0;
+            $message = "OK, now filtering out '$params'";
+        }
+        elsif ( lc $command eq 'twitterunfilter' ) {
+            if ( exists $chanfilters->{$params} ) {
+                delete $chanfilters->{$params};
+                $message = "OK, no longer filtering out '$params'";
+            }
+            else {
+                $message = "I wasn't filtering out '$params'.";
+            }
+        }
+        elsif ( lc $command eq 'twitterfiltering' ) {
+            $message = "Currently filtering out: " . join ',',
+              map { qq["$_"] } keys %$chanfilters;
+        }
 
         $self->set( 'twitter_searches', $searches );
+        $self->set( 'twitter_filters', $filters );
 
         return $message;
     }
@@ -101,6 +131,7 @@ sub tick {
     my $twitter  = Net::Twitter::Lite->new;
     my $searches = $self->get('twitter_searches') || {};
     my $ignore   = $self->get('twitter_ignore') || {};
+    my $filters  = $self->get('twitter_filters') || {};
 
     for my $channel ( keys %$searches ) {
         my %results;
@@ -130,6 +161,18 @@ sub tick {
                           if ( $self->get('user_debug') == 1 );
                         return;
                     }
+
+                    # Filter out tweets based on content filters
+                    my $skip = 0;
+                    for my $filterterm ( keys %{ $filters->{$channel} } ) {
+                        if ($result->{text} =~ /$filterterm/) {
+                            $skip = 1;
+                            warn __PACKAGE__.": Ignoring tweet '$result->{text}' due to filter '$filterterm'"
+                              if ( $self->get('user_debug') == 1);
+                            last;
+                        }
+                    }
+                    next if $skip;
 
                     # Retweets can be a bit spammy at times, so skip them:
                     next if $result->{text} =~ /^RT/;
@@ -181,7 +224,7 @@ sub tick {
 
 sub help {
     return
-"!twitterwatch <term>; !twitterunwatch <term>; !twittersearches; !twitterignore <user>";
+"!twitterwatch <term>; !twitterunwatch <term>; !twittersearches; !twitterignore <user>; !twitterignoring; !twitterfilter <term>; !twitterunfilter <term>; !twitterfiltering";
 }
 
 =head1 AUTHOR
