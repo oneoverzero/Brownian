@@ -30,8 +30,7 @@ sub new
         cfg => $args{cfg},
         normalline => '^\d{2}-\d{2}-\d{4} (\d{2}):\d{2}:\d{2} [!-><]+ ([^! ]+)(?:![^ ]+)?: (.*)',
         proxyline  => '^\d{2}-\d{2}-\d{4} (\d{2}):\d{2}:\d{2} [!-><]+ [_\d\w><\[\]]+(?:![^ ]+)?: [<\[]([^! ]+)[>\]] (.*)',
-        actionline => '^\d{2}-\d{2}-\d{4} (\d{2}):\d{2}:\d{2} [!-><]+ \* ([^! ]+)(?:![^ ]+)? (.*)',
-        proxyactionline => '^\d{2}-\d{2}-\d{4} (\d{2}):\d{2}:\d{2} [!-><]+ [^! ]+(?:![^ ]+)?: [*\s]*\*([^! \*])\* (.*)',
+        actionline => '(?:^\d{2}-\d{2}-\d{4} (\d{2}):\d{2}:\d{2} [!-><]+ \* ([^! ]+)(?:![^ ]+)? (.*))',
         thirdline  => '^\d{2}-\d{2}-\d{4} (\d{2}):(\d{2}):\d{2} [!-><]+ ([^! ]+)(?:![^ ]+)? (.*)',
     };
 
@@ -50,8 +49,6 @@ sub normalline
     $hash{nick}   = $2;
     $hash{saying} = utf8::decode($3);
 
-    print $line if ($hash{nick} =~ /lobsters/);
-
     return if ($hash{nick} eq '...');
     return \%hash;
   }
@@ -60,8 +57,6 @@ sub normalline
     $hash{hour}   = $1;
     $hash{nick}   = $2;
     $hash{saying} = $3;
-
-    print $line if ($hash{nick} =~ /lobsters/);
 
     return if ($hash{nick} eq '...');
     return \%hash;
@@ -75,21 +70,13 @@ sub actionline
   my ($self, $line, $lines) = @_;
   my %hash;
 
-  if ($line =~ /$self->{proxyactionline}/o)
+  if ($line =~ /$self->{actionline}/o)
   {
     $hash{hour}   = $1;
     $hash{nick}   = $2;
-    $hash{saying} = $4;
+    $hash{saying} = $3;
 
-    print "ACTION: '$1' '$2' '$4'\n";
-
-    return \%hash;
-  }
-  elsif ($line =~ /$self->{actionline}/o)
-  {
-    $hash{hour}   = $1;
-    $hash{nick}   = $2;
-    $hash{saying} = $4;
+    print "ACTION: '$hash{hour}' '$hash{nick}' '$hash{saying}'\n";
 
     return \%hash;
   } else {
