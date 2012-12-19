@@ -3,55 +3,128 @@
 use 5.014;
 use warnings;
 
-use Regexp::Common qw /URI/;
 use File::Basename 'basename';
-use CGI;
+use Regexp::Common qw/URI/;
+use Mojo::Template;
+use Getopt::Long;
+
+my $templates = {
+
+  default => <<'DEFAULT',
+% my ( $urls, $file ) = @_;
+<!DOCTYPE html>
+<!-- @smpb was here -->
+<html>
+  <head>
+    <title>Links from #heartofgold</title>
+    <style type="text/css">
+      body  { background: #eee; font-family: 'Trebuchet MS' sans-serif; }
+      h1#t  { text-align: center; margin-bottom: 30px; }
+      h2    { font-size: 1em; }
+      ul    { list-style-type: none; }
+      #c    { background: #fff; border:1px solid #ccc; margin:auto; width: 90%; padding: 10px; }
+      .ll   { margin-bottom: 30px; }
+      .id   { color:#c00; font-style:italic; }
+    </style>
+  </head>
+  <body>
+    <h1 id='t'>Links from backlog '<a href='<%= $file %>'><%= $file %></a>'</h1>
+    <div id='c'>
+      % foreach my $date (sort { join('', (split ':', $a)[0,1]) cmp join('', (split ':', $b)[0,1]); } keys %$urls)
+      % {
+      <h2>[<%= $date %>]</h2>
+      <ul class='ll'>
+      %   foreach my $user ( sort keys %{$urls->{$date}} )
+      %   {
+        <li><span class='id'><%= $user %></span> shared <a href='<%= $urls->{$date}{$user}{url} %>'><%= $urls->{$date}{$user}{title} %></a></li>
+      %   }
+      </ul>
+      % }
+    </div>
+  </body>
+</html>
+DEFAULT
+
+};
+
+
+my $parsers = {
+
+  brownian => sub {
+    my ($line, $output) = @_;
+
+    state $found;
+    state $date;
+    state $user;
+
+    # we found a new url
+    if ($line =~ /^\[[#\w]+\s+(\d+:\d+).*<([\w]+)>.*($RE{URI}{HTTP}{ -scheme => qr{https?} })/)
+    {
+      $date = $1;
+      $user = $2;
+
+      $found = $3;
+      $output->{$date}{$user}{url}   = $3;
+      $output->{$date}{$user}{title} = $3;
+    }
+
+    # we found the line in which brownian spews out the url's description
+    if ($found and $line =~ /brownian> \[ ([\w\W]+) \]/)
+    {
+      $output->{$date}{$user}{title} = $1 if ($found eq $output->{$date}{$user}{url});
+      $found = $date = $user = undef;
+    }
+  }
+
+};
+
+
+sub parse
+{
+  my ($file, $action) = @_;
+  my $output = {};
+
+  open my $fh, '<', $file or do { say "ERROR: $!"; exit };
+
+  while (<$fh>)
+  {
+    $action->($_, $output);
+  }
+
+  close $fh;
+  return $output;
+}
 
 #
 
-open my $fh, '<', $ARGV[0] or die $!;
+my $i; my $o;
+my $p = 'brownian';
+my $t = 'default';
 
-my $urls = {};
+GetOptions(
+  'input=s'  => \$i,
+  'output=s' => \$o,
+  'parser=s' => \$p,
+  'template' => \$t
+);
 
-my $found = 0;
-my $date;
-my $url;
-while (<$fh>)
+unless (defined $i) { say "ERROR: no '--input' file specified."; exit }
+unless (defined $templates->{$t}) { say "ERROR: unknown template specified."; exit }
+
+#
+
+my $mt   = Mojo::Template->new;
+my $urls = &parse($i, $parsers->{$p});
+my $html = $mt->render($templates->{$t}, $urls, basename $i);
+
+if (defined $o)
 {
-  /^\[[#\w]+\s+([:\d]+)\].*($RE{URI}{HTTP}{ -scheme => qr{https?} })/ &&
-    do
-    {
-      $found++;
-      $date = $1;
-      $url  = $2;
-      $urls->{$date}{$url}++
-    };
-
-  $found && /brownian> \[ ([\w\W]+) \]/ &&
-    do
-    {
-      $found--;
-      $urls->{$date}{$url} = $1;
-      $date = $url = undef;
-    };
+  open my $fh, '>', $o or do { say "ERROR: $!"; exit };
+  print $fh $html;
+  close $fh;
+}
+else
+{
+  say $html;
 }
 
-close $fh;
-
-# HTML
-
-my $cgi = CGI->new;
-
-say $cgi->start_html(-title => 'Links from #heartofgold');
-say $cgi->h1( 'Links from ' . $cgi->a( { href => basename $ARGV[0] }, basename $ARGV[0] ) );
-
-foreach my $date (sort {
-    join('', (split ':', $a)[0,1,2]) cmp join('', (split ':', $b)[0,1,2]);
-  } keys $urls)
-{
-
-  say $cgi->h2( $date );
-  say $cgi->ul( $cgi->li({-type=>'disc'}, [ sort map { "$urls->{$date}{$_}  : " . $cgi->a( { href => $_ }, $_ ) } sort keys $urls->{$date} ]) );
-}
-
-say $cgi->end_html;
