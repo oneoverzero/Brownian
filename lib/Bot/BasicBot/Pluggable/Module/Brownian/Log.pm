@@ -99,6 +99,32 @@ sub chanpart {
     return;
 }
 
+sub topic {
+    my ($self, $message) = @_;
+    $self->_log( $message, 'TOPIC: ' . $message->{who} . ' - ' . $message->{topic} );
+    return;
+}
+
+sub nick_change {
+    my ($self, $old, $new) = @_;
+    my $message = { channel => '', who => $old, nick => $new };
+    $self->_log( $message, 'NICK: ' . $message->{who} . ' - ' . $message->{nick} );
+    return;
+}
+
+sub kicked {
+    my ($self, $message) = @_;
+    $self->_log( $message, 'KICK: ' . $message->{who} . ' - ' . $message->{kicked} . ' (' . $message->{reason} . ')' );
+    return;
+}
+
+sub userquit {
+    my ($self, $message) = @_;
+    $message->{channel} ||= '';
+    $self->_log( $message, 'QUIT: ' . $message->{who} . ' (' . $message->{body} . ')' );
+    return;
+}
+
 sub help {
     return 'Logs all activities in a channel.';
 }
