@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!-- @smpb was here -->
+<html>
+  <head>
+    <title>#heartofgold log</title>
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+    <style type='text/css'>
+      body    { background: #eee; font-family: 'Trebuchet MS' sans-serif; }
+      h1#t    { text-align: center; margin-bottom: 30px; }
+      #dp     { margin:auto; width: 90%; padding: 10px; }
+      #c      { background: #fff; border:1px solid #ccc; margin:auto; width: 90%; padding: 10px; }
+      table   { border-collapse: collapse }
+      td      { padding: 2px; }
+      th      { text-align: left; }
+      .date   { color: #888; }
+      .id     { color: #c00; font-style:italic; }
+      .join   { background: #efe; }
+      .nick   { background: #eef; }
+      .topic  { background: #eef; }
+      .quit   { background: #fee; }
+      .part   { background: #fee; }
+      .kick   { background: #fee; }
+      .ui-datepicker-append { color: red; margin-left: 5px; }
+    </style>
+  </head>
+  <body>
+    <h1 id='t'>#heartofgold log for <span id='day'></span></h1>
+    <div id='dp'>
+      <p>Pick a date: <input type="text" id="datepicker" /></p>
+    </div>
+    <div id='c'>
+      <table>
+        <thead>
+          <tr><th>Time</th><th>User</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </body>
+
+  <script type='text/javascript'>
+    function set_date(date) {
+      if (typeof date === 'undefined') { date = new Date() }
+      $('#day').html( date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear() );
+    }
+
+    function make_clickable(text) {
+      var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+      return text.replace(exp,"<a href='$1'>$1</a>"); 
+    }
+
+    function load_log(day, month, year) {
+      $.ajax({
+        url: 'json/heartofgold_' + year + month + day + '.json',
+        success: function(data) {
+          if (data !== '')
+          {
+            $('#c').find('tbody').empty();
+            for (var i=0,len=data.length;i<len;i++)
+            {
+              var message = data[i];
+              $('#c').find('tbody:last').append(
+                '<tr class="' + message.type + '">' +
+                '<td class="date">' + message.date  +
+                '</td><td class="id">' + message.user +
+                '</td><td>' + make_clickable( message.body ) + '</td></tr>'
+              );
+            }
+          }
+
+          set_date( new Date( year, month - 1, day) );
+          $('#datepicker' ).datepicker( 'option', 'appendText', ' ' );
+        },
+        error: function(jqXHR, status, error) {
+          $('#datepicker' ).datepicker( 'option', 'appendText', 'No log for this day has been found!' );
+        },
+        dataType: 'json'
+      });
+    }
+
+    $(function() {
+      $('#datepicker').datepicker({
+        dateFormat: 'dd/mm/yy',
+        onSelect: function() {
+          var date = $(this).val().split('/');
+          load_log( date[0], date[1], date[2] );
+        }
+      });
+
+      var today = new Date();
+      load_log(today.getDate(), today.getMonth() + 1, today.getFullYear());
+    });
+  </script>
+
+</html>
