@@ -1,0 +1,45 @@
+#
+# Regexp::Grammars definition for Bip - bip.milkypond.org - IRC logs
+#
+
+#<logfile: parser_log>
+#<debug: match>
+
+<nocontext:>
+
+<DATE> ( <TOPIC> | <JOIN> | <KICK> | <MODE> | <QUIT> | <AKA> | <INVITE> | <EMOTE> | <DIALOG> )
+
+
+<rule: DATE>          <DAY= NUM>  - <MONTH= NUM>  - <YEAR= NUM>
+                      <HOUR= NUM> : <MINUTE= NUM> : <SECOND= NUM>
+<rule: NUM>           \d+
+
+<rule: TOPIC>         <.STATUS> ( ( <SENDER><SOURCE> changed topic of <CHANNEL> to: <CONTENT> ) |
+                                  ( Topic set by <SENDER><SOURCE> \[ <CONTENT> \]) |
+                                  ( Topic for <CHANNEL>: <CONTENT> ) )
+<rule: JOIN>          <.STATUS> ( ( <SENDER><SOURCE> has joined <CHANNEL> ) |
+                                  ( <NAME>@<HOST> has joined the channel with the alias '<SENDER>' ) |
+                                  ( Connected to server ) )
+<rule: KICK>          <.STATUS> ( ( <TARGET> has been kicked by <SENDER><SOURCE> \[ <CONTENT> \] ) |
+                                  ( \*<SENDER>\* kicked <TARGET> ) )
+<rule: MODE>          <.STATUS> mode/<CHANNEL> \[ <CONTENT> \] by <SENDER>?
+<rule: QUIT>          <.STATUS> ( ( <SENDER><SOURCE> has (?: quit | left ) <CHANNEL>? ( \[ <CONTENT> \] )? ) |
+                                  ( <SENDER> has left the room \(<NAME>@<HOST>\) ) |
+                                  ( Disconnected from server ) )
+<rule: AKA>           <.STATUS> '?<SENDER>'? is now known as '?<TARGET>'?
+<rule: INVITE>        <.STATUS> <SENDER> invited <TARGET>(@<HOST>)*
+
+<rule: STATUS>        ( -!- | ( [><] subetha[`\w]*<SOURCE>: [\*\.><]* ) )
+
+<rule: EMOTE>         [><] ( ( subetha[`\w]*<SOURCE>: \* \*<SENDER>\* <CONTENT> )  | ( \* <SENDER><SOURCE>  <CONTENT> ) )
+<rule: DIALOG>        [><] ( ( subetha[`\w]*<SOURCE>:    \<<SENDER>\> <CONTENT> )  | (    <SENDER><SOURCE>: <CONTENT> ) )
+
+<rule: CONTENT>       .+
+<rule: SENDER>        [-`\{\}\[\]\|\.\w]+
+<rule: TARGET>        [-`\{\}\[\]\|\.\w]+
+<rule: CHANNEL>       \#[-\w]+
+
+<rule: SOURCE>        ( ![~]?<NAME>@<HOST> )?
+<rule: NAME>          [-`\{\}\[\]\|\.\w]+
+<rule: HOST>          [-:\/\.\w]+
+
