@@ -6,6 +6,7 @@ use warnings;
 use Mojo::JSON;
 use Data::Dumper;
 use Getopt::Long;
+use Regexp::Common 'URI';
 use File::Basename 'fileparse';
 
 my $parsers = {
@@ -74,6 +75,29 @@ my $parsers = {
         user => $user,
         body => $body,
       };
+    }
+  },
+
+  links => sub {
+    my ($line, $output) = @_;
+
+    state $message = {};
+
+    # we found a new url
+    if ($line =~ /^\[[#\w]+\s+([:\d]+).*<([\w]+)>.*($RE{URI}{HTTP}{ -scheme => qr{https?} })/)
+    {
+      $message->{date}  = $1;
+      $message->{user}  = $2;
+      $message->{url}   = $3;
+      $message->{title} = $3;
+    }
+
+    # we found the line in which brownian spews out the url's description
+    if ($message->{date} and $line =~ /brownian> \[ ([\w\W]+) \]/)
+    {
+      $message->{title} = $1;
+      push @$output, $message;
+      $message = {};
     }
   },
 };
