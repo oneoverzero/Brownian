@@ -97,6 +97,7 @@ sub parse
 
 #
 
+my $f;
 my $i = 'new';
 my $o = '.';
 my $p = 'brownian';
@@ -105,6 +106,7 @@ GetOptions(
   'input=s'  => \$i,
   'output=s' => \$o,
   'parser=s' => \$p,
+  'file=s'   => \$f,
 );
 
 unless (defined $i) { say "ERROR: no '--input' directory specified."; exit }
@@ -116,10 +118,14 @@ my $mj    = Mojo::JSON->new;
 
 opendir my $dh, $i or die "$!";
 my @files;
-@files = grep { /heartofgold/i } readdir $dh;
+
+my $pattern = defined $f ? qr/$f/ : qr/heartofgold/i;
+
+@files = grep { /$pattern/ } readdir $dh;
 
 foreach my $log ( @files )
 {
+  say $log;
   my $lines = &parse( "$i/$log", $parsers->{$p});
   say Dumper $lines if ($ENV{DEBUG});
   my $json  = $mj->encode($lines);
