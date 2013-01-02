@@ -58,6 +58,8 @@
     }
 
     function load_log(day, month, year) {
+      day   = ('0' + day).slice(-2);
+      month = ('0' + month).slice(-2);
       $.ajax({
         url: 'json/heartofgold_' + year + month + day + '.json',
         success: function(data) {
