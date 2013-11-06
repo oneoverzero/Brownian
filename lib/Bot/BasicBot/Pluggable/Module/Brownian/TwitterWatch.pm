@@ -128,7 +128,7 @@ sub tick {
       if time - $self->get('twitter_last_searched') < $seconds_between_checks;
 
     # OK, time to do the searches:
-    my $twitter  = Net::Twitter::Lite->new;
+    my $twitter  = Net::Twitter::Lite->new({ legacy_lists_api => 1 });
     my $searches = $self->get('twitter_searches') || {};
     my $ignore   = $self->get('twitter_ignore') || {};
     my $filters  = $self->get('twitter_filters') || {};
